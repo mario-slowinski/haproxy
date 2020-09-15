@@ -1,0 +1,49 @@
+- name: "Create conf.d directory"
+  tags: haproxy-config-directory
+  file:
+    state: directory
+    path: /etc/haproxy/conf.d
+    mode: 0755
+    owner: root
+    group: root
+    setype: etc_t
+
+- name: "Backup and copy haproxy.cfg as conf.d/base.cfg"
+  tags: haproxy-config-base
+  copy:
+    dest: "{{ item }}"
+    src: /etc/haproxy/haproxy.cfg
+    remote_src: yes
+    force: no
+    mode: preserve
+    setype: etc_t
+  loop:
+  - /etc/haproxy/haproxy.cfg-org
+  - /etc/haproxy/conf.d/base.cfg
+
+- name: "Remove default frontend and backend from conf.d/base"
+  tags: haproxy-config-base
+  replace:
+    path: /etc/haproxy/conf.d/base.cfg
+    regexp: "(?s)^# main frontend which proxys to the backends.*$\r*\n*"
+    replace: '# contents of /etc/haproxy/conf.d/* files\n'
+
+- name: "Create loadbalancer conf.d includes"
+  tags: haproxy-config-include
+  template:
+    dest: "/etc/haproxy/conf.d/{{ item['name'] }}.cfg"
+    src: include.ji2
+  loop: "{{ haproxy_applications }}"
+
+- name: "Assemble config file from conf.d/*"
+  tags: haproxy-config-assemble
+  assemble:
+    dest: /etc/haproxy/haproxy.cfg
+    src: /etc/haproxy/conf.d
+    remote_src: yes
+    mode: 0644
+    owner: root
+    group: root
+    setype: etc_t
+    validate: haproxy -c -f %s
+  notify: "Restart haproxy"

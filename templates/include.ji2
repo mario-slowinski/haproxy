@@ -1,0 +1,13 @@
+#---------------------------------------------------------------------
+frontend {{ item['name'] }}
+    bind :{{ item['bind'] }}
+    mode {{ item['mode'] | default('http') }}
+    default_backend {{ item['name'] }}
+    option tcplog
+
+backend {{ item['name'] }}
+    balance {{ item['balance'] | default('roundrobin') }}
+{% for server in item['servers'] %}
+    server {{ server }} {{ hostvars[server]['ansible_host'] }}:{{ item['bind'] }} check
+{% endfor %}
+

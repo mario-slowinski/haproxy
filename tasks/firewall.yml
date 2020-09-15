@@ -1,0 +1,6 @@
+- name: "Allow ports in SELinux"
+  seport:
+    ports: "{{ item | string }}"
+    proto: tcp
+    setype: http_port_t
+  loop: "{{ haproxy_firewalld['zones'] | map(attribute='ports') | flatten | unique }}"

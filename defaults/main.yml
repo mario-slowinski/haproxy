@@ -1,0 +1,14 @@
+haproxy_firewalld:
+  zones:
+  - name: public
+    services:
+    - http
+    - https
+    ports: []
+
+haproxy_applications:
+- name: http
+  bind: 80
+  mode: tcp
+  balance: roundrobin
+  servers: "{{ groups[group_names | first] }}"

@@ -1,0 +1,8 @@
+- name: "Configure firewall"
+  tags: haproxy-firewall
+  include_tasks: firewall.yml
+
+- name: "Configure haproxy"
+  tags: haproxy-config
+  include_tasks: config.yml
+
