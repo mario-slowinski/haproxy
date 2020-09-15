@@ -1,0 +1,4 @@
+dependencies:
+- role: service
+  service_rpms: "{{ haproxy_rpms }}"
+  service_firewalld: "{{ haproxy_firewalld }}"
