@@ -1,8 +1,8 @@
-- name: "Configure firewall"
+- name: "Configure SELinux"
   tags:
   - haproxy
-  - haproxy-firewall
-  import_tasks: firewall.yml
+  - haproxy-selinux
+  import_tasks: selinux.yml
 
 - name: "Configure haproxy"
   tags:
