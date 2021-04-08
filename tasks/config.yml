@@ -1,6 +1,6 @@
 - name: "Create conf.d directory"
   tags: haproxy-config-directory
-  file:
+  ansible.builtin.file:
     state: directory
     path: /etc/haproxy/conf.d
     mode: 0755
@@ -10,7 +10,7 @@
 
 - name: "Backup and copy haproxy.cfg as conf.d/base.cfg"
   tags: haproxy-config-base
-  copy:
+  ansible.builtin.copy:
     dest: "{{ item }}"
     src: /etc/haproxy/haproxy.cfg
     remote_src: yes
@@ -23,21 +23,21 @@
 
 - name: "Remove default frontend and backend from conf.d/base"
   tags: haproxy-config-base
-  replace:
+  ansible.builtin.replace:
     path: /etc/haproxy/conf.d/base.cfg
     regexp: "(?s)^# main frontend which proxys to the backends.*$\r*\n*"
     replace: '# contents of /etc/haproxy/conf.d/* files\n'
 
 - name: "Create loadbalancer conf.d includes"
   tags: haproxy-config-include
-  template:
+  ansible.builtin.template:
     dest: "/etc/haproxy/conf.d/{{ item['name'] }}.cfg"
     src: include.ji2
   loop: "{{ haproxy_applications }}"
 
 - name: "Assemble config file from conf.d/*"
   tags: haproxy-config-assemble
-  assemble:
+  ansible.builtin.assemble:
     dest: /etc/haproxy/haproxy.cfg
     src: /etc/haproxy/conf.d
     remote_src: yes
