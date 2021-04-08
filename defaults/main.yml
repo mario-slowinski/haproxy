@@ -12,3 +12,16 @@ haproxy_applications:
   mode: tcp
   balance: roundrobin
   servers: "{{ groups[group_names | first] }}"
+  options: []
+- name: https
+  bind: 443
+  mode: tcp
+  balance: roundrobin
+  servers: "{{ groups[group_names | first] }}"
+  options:
+  - "check"
+  - "check-ssl"
+  - "verify none"
+  - "inter 5s"
+  - "rise 1"
+  - "fall 2"
