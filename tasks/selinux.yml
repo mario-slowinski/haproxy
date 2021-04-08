@@ -1,4 +1,12 @@
+- name: "Enable haproxy_connect_any SELinux property"
+  tags: selinux-sebool
+  ansible.posix.seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
+
 - name: "Allow ports in SELinux"
+  tags: selinux-seport
   seport:
     ports: "{{ item | string }}"
     proto: tcp
