@@ -4,7 +4,8 @@ haproxy_firewalld:
     services:
     - http
     - https
-    ports: []
+    ports:
+    - 9000
 
 haproxy_applications:
 - name: http
