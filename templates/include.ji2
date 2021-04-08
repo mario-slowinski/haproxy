@@ -1,6 +1,6 @@
 #---------------------------------------------------------------------
 frontend {{ item['name'] }}
-    bind :{{ item['bind'] }}
+    bind {{ item['bind']['host'] }}:{{ item['bind']['port'] }}
     mode {{ item['mode'] | default('http') }}
     default_backend {{ item['name'] }}
     option tcplog
@@ -8,6 +8,6 @@ frontend {{ item['name'] }}
 backend {{ item['name'] }}
     balance {{ item['balance'] | default('roundrobin') }}
 {% for server in item['servers'] %}
-    server {{ server }} {{ hostvars[server]['ansible_host'] }}:{{ item['bind'] }} check
+    server {{ hostvars[server]['inventory_hostname_short'] }} {{ hostvars[server]['ansible_host'] }}:{{ item['port'] }} {{ item['settings'] | join(' ') }}
 {% endfor %}
 
