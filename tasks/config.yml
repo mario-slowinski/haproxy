@@ -46,4 +46,4 @@
     group: root
     setype: etc_t
     validate: haproxy -c -f %s
-  notify: "Restart haproxy"
+  notify: "Restart haproxy service"
