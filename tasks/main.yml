@@ -1,8 +1,12 @@
 - name: "Configure firewall"
-  tags: haproxy-firewall
+  tags:
+  - haproxy
+  - haproxy-firewall
   import_tasks: firewall.yml
 
 - name: "Configure haproxy"
-  tags: haproxy-config
+  tags:
+  - haproxy
+  - haproxy-config
   import_tasks: config.yml
 
