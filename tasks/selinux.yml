@@ -7,7 +7,7 @@
 
 - name: "Allow ports in SELinux"
   tags: selinux-seport
-  seport:
+  community.general.seport:
     ports: "{{ item | string }}"
     proto: tcp
     setype: http_port_t
