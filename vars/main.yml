@@ -1,5 +1,6 @@
 haproxy_pkgs:
-- haproxy
-- python3-libselinux
-- python3-policycoreutils
+- name:
+  - haproxy
+  - python3-libselinux
+  - python3-policycoreutils
 
