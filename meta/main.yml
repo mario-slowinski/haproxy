@@ -48,6 +48,5 @@ galaxy_info:
 
 dependencies:
 - role: service
-  vars:
-    service_pkgs: "{{ haproxy_pkgs }}"
-    service_firewalld: "{{ haproxy_firewalld }}"
+  service_pkgs: "{{ haproxy_pkgs }}"
+  service_firewalld: "{{ haproxy_firewalld }}"
