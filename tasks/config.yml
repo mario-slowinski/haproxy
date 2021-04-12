@@ -19,14 +19,22 @@
     setype: etc_t
   loop:
   - /etc/haproxy/haproxy.cfg-org
-  - /etc/haproxy/conf.d/base.cfg
+  - /etc/haproxy/conf.d/00-base.cfg
 
 - name: "Remove default frontend and backend from conf.d/base"
   tags: haproxy-config-base
   ansible.builtin.replace:
-    path: /etc/haproxy/conf.d/base.cfg
+    path: /etc/haproxy/conf.d/00-base.cfg
     regexp: "(?s)^# main frontend which proxys to the backends.*$\r*\n*"
-    replace: '# contents of /etc/haproxy/conf.d/* files\n'
+    replace: |
+      listen stats
+        bind :9000
+        mode http
+        option httplog
+        stats enable
+        stats uri /
+
+      # contents of /etc/haproxy/conf.d/* files
 
 - name: "Create loadbalancer conf.d includes"
   tags: haproxy-config-include
