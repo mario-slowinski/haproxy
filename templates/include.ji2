@@ -7,6 +7,7 @@ frontend {{ item['name'] }}
 
 backend {{ item['name'] }}
     balance {{ item['balance'] | default('roundrobin') }}
+    mode {{ item['mode'] | default('http') }}
 {% for server in item['servers'] %}
     server {{ hostvars[server]['inventory_hostname_short'] }} {{ hostvars[server]['ansible_host'] }}:{{ item['port'] }} {{ item['settings'] | join(' ') }}
 {% endfor %}
