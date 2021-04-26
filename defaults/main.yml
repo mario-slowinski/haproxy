@@ -1,36 +1,39 @@
+---
 haproxy_firewalld:
   zones:
-  - name: public
-    services:
-    - http
-    - https
-    ports:
-    - 9000
+    - name: public
+      services:
+        - http
+        - https
+      ports:
+        - 9000
 
 
 # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#5.2
 haproxy_applications:
-- name: http
-  bind:
-    host: "*"
-    port: 80
-  mode: tcp
-  balance: roundrobin # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#4-balance
-  servers: "{{ groups[group_names | first] }}"
-  port: "{{ bind['port'] }}"
-  settings: []
-- name: https
-  bind:
-    host: "*"
-    port: 443
-  mode: tcp
-  balance: roundrobin
-  servers: "{{ groups[group_names | first] }}"
-  port: "{{ bind['port'] }}"
-  settings:
-  - "check"
-  - "check-ssl"
-  - "verify none"
-  - "inter 2s"
-  - "rise 2"
-  - "fall 3"
+  - name: http
+    bind:
+      host: "*"
+      port: 80
+    mode: tcp
+    # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#4-balance
+    balance: roundrobin
+    servers: "{{ groups[group_names | first] }}"
+    port: "{{ bind['port'] }}"
+    settings: []
+
+  - name: https
+    bind:
+      host: "*"
+      port: 443
+    mode: tcp
+    balance: roundrobin
+    servers: "{{ groups[group_names | first] }}"
+    port: "{{ bind['port'] }}"
+    settings:
+      - "check"
+      - "check-ssl"
+      - "verify none"
+      - "inter 2s"
+      - "rise 2"
+      - "fall 3"

@@ -1,12 +1,12 @@
+---
 - name: "Configure SELinux"
   tags:
-  - haproxy
-  - haproxy-selinux
+    - haproxy
+    - haproxy.selinux
   import_tasks: selinux.yml
 
 - name: "Configure haproxy"
   tags:
-  - haproxy
-  - haproxy-config
+    - haproxy
+    - haproxy.config
   import_tasks: config.yml
-
