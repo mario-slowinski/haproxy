@@ -3,10 +3,10 @@
   tags:
     - haproxy
     - haproxy.selinux
-  import_tasks: selinux.yml
+  ansible.builtin.import_tasks: selinux.yml
 
 - name: "Configure haproxy"
   tags:
     - haproxy
     - haproxy.config
-  import_tasks: config.yml
+  ansible.builtin.import_tasks: config.yml
