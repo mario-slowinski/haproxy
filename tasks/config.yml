@@ -1,31 +1,31 @@
 ---
-- name: "Create conf.d directory"
+- name: "Create {{ haproxy_config['path'] }} directory"
   tags: haproxy.config.directory
   ansible.builtin.file:
     state: directory
-    path: /etc/haproxy/conf.d
-    mode: 0755
-    owner: root
-    group: root
-    setype: etc_t
+    path: "{{ haproxy_config['path'] }}"
+    mode: 0o755
+    owner: "{{ haproxy_config['owner'] }}"
+    group: "{{ haproxy_config['group'] }}"
+    setype: "{{ haproxy_config['setype'] }}"
 
-- name: "Backup and copy haproxy.cfg as conf.d/base.cfg"
+- name: "Backup and copy {{ haproxy_config['file'] }} as {{ haproxy_config['path'] }}base.cfg"
   tags: haproxy.config.base
   ansible.builtin.copy:
     dest: "{{ item }}"
-    src: /etc/haproxy/haproxy.cfg
+    src: "{{ haproxy_config['file'] }}"
     remote_src: true
     force: false
     mode: preserve
-    setype: etc_t
+    setype: "{{ haproxy_config['setype'] }}"
   loop:
-    - /etc/haproxy/haproxy.cfg-org
-    - /etc/haproxy/conf.d/00-base.cfg
+    - "{{ haproxy_config['file'] }}-org"
+    - "{{ haproxy_config['path'] }}00-base.cfg"
 
-- name: "Remove default frontend and backend from conf.d/base"
+- name: "Remove default frontend and backend from {{ haproxy_config['path'] }}base"
   tags: haproxy.config.base
   ansible.builtin.replace:
-    path: /etc/haproxy/conf.d/00-base.cfg
+    path: "{{ haproxy_config['path'] }}00-base.cfg"
     regexp: "(?s)^# main frontend which proxys to the backends.*$\r*\n*"
     replace: |
       listen stats
@@ -35,24 +35,23 @@
         stats enable
         stats uri /
 
-      # contents of /etc/haproxy/conf.d/* files
+      # contents of {{ haproxy_config['path'] }}* files
 
-- name: "Create loadbalancer conf.d includes"
+- name: "Create loadbalancer {{ haproxy_config['path'] }} includes"
   tags: haproxy.config.include
   ansible.builtin.template:
-    dest: "/etc/haproxy/conf.d/{{ item['name'] }}.cfg"
+    dest: "{{ haproxy_config['path'] }}{{ item['name'] }}.cfg"
     src: include.ji2
   loop: "{{ haproxy_applications }}"
 
-- name: "Assemble config file from conf.d/*"
+- name: "Assemble config file from {{ haproxy_config['path'] }}*"
   tags: haproxy.config.assemble
   ansible.builtin.assemble:
-    dest: /etc/haproxy/haproxy.cfg
-    src: /etc/haproxy/conf.d
+    dest: "{{ haproxy_config['file'] }}"
+    src: "{{ haproxy_config['path'] }}"
     remote_src: true
-    mode: 0644
-    owner: root
-    group: root
-    setype: etc_t
+    owner: "{{ haproxy_config['owner'] }}"
+    group: "{{ haproxy_config['group'] }}"
+    setype: "{{ haproxy_config['setype'] }}"
     validate: haproxy -c -f %s
   notify: "Restart haproxy service"

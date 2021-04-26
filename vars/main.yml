@@ -4,3 +4,12 @@ haproxy_pkgs:
       - haproxy
       - python3-libselinux
       - python3-policycoreutils
+
+
+haproxy_config:
+  path: /etc/haproxy/conf.d/
+  file: /etc/haproxy/haproxy.cfg
+  owner: root
+  group: root
+  mode: 0o644
+  setype: etc_t
