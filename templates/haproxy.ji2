@@ -1,0 +1,10 @@
+{% include 'global.ji2' %}
+
+
+{% include 'defaults.ji2' %}
+
+
+{% include 'stats.ji2' %}
+
+
+{% include 'applications.ji2' %}

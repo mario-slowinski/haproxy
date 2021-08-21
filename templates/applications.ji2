@@ -1,14 +1,18 @@
+{% for application in haproxy_applications %}
 #---------------------------------------------------------------------
-frontend {{ item['name'] }}
-    bind {{ item['bind']['host'] }}:{{ item['bind']['port'] }}
-    mode {{ item['mode'] | default('http') }}
-    default_backend {{ item['name'] }}
+# {{ application['name'] }}
+#---------------------------------------------------------------------
+frontend {{ application['name'] }}
+    bind {{ application['bind']['host'] }}:{{ application['bind']['port'] }}
+    mode {{ application['mode'] | default('http') }}
+    default_backend {{ application['name'] }}
     option tcplog
 
-backend {{ item['name'] }}
-    balance {{ item['balance'] | default('roundrobin') }}
-    mode {{ item['mode'] | default('http') }}
-{% for server in item['servers'] %}
-    server {{ hostvars[server]['inventory_hostname_short'] }} {{ hostvars[server]['ansible_host'] }}:{{ item['port'] }} {{ item['settings'] | join(' ') }}
+backend {{ application['name'] }}
+    balance {{ application['balance'] | default('roundrobin') }}
+    mode {{ application['mode'] | default('http') }}
+{% for server in application['servers'] %}
+    server {{ hostvars[server]['inventory_hostname_short'] }} {{ hostvars[server]['ansible_host'] }}:{{ application['port'] }} {{ application['settings'] | join(' ') }}
 {% endfor %}
 
+{% endfor %}
