@@ -1,0 +1,6 @@
+listen stats
+  bind :9000
+  mode http
+  option httplog
+  stats enable
+  stats uri /
