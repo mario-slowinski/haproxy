@@ -19,7 +19,7 @@ haproxy_applications:
     # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#4-balance
     balance: roundrobin
     servers: "{{ groups[group_names | first] }}"
-    port: "{{ bind['port'] }}"
+    port: 80
     settings: []
 
   - name: https
@@ -29,7 +29,7 @@ haproxy_applications:
     mode: tcp
     balance: roundrobin
     servers: "{{ groups[group_names | first] }}"
-    port: "{{ bind['port'] }}"
+    port: 443
     settings:
       - "check"
       - "check-ssl"
