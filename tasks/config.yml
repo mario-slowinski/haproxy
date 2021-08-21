@@ -1,57 +1,7 @@
 ---
-- name: "Create {{ haproxy_config['path'] }} directory"
-  tags: haproxy.config.directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ haproxy_config['path'] }}"
-    mode: 0o755
-    owner: "{{ haproxy_config['owner'] }}"
-    group: "{{ haproxy_config['group'] }}"
-    setype: "{{ haproxy_config['setype'] }}"
-
-- name: "Backup and copy {{ haproxy_config['file'] }} as {{ haproxy_config['path'] }}base.cfg"
-  tags: haproxy.config.base
-  ansible.builtin.copy:
-    dest: "{{ item }}"
-    src: "{{ haproxy_config['file'] }}"
-    remote_src: true
-    force: false
-    mode: preserve
-    setype: "{{ haproxy_config['setype'] }}"
-  loop:
-    - "{{ haproxy_config['file'] }}-org"
-    - "{{ haproxy_config['path'] }}00-base.cfg"
-
-- name: "Remove default frontend and backend from {{ haproxy_config['path'] }}base"
-  tags: haproxy.config.base
-  ansible.builtin.replace:
-    path: "{{ haproxy_config['path'] }}00-base.cfg"
-    regexp: "(?s)^# main frontend which proxys to the backends.*$\r*\n*"
-    replace: |
-      listen stats
-        bind :9000
-        mode http
-        option httplog
-        stats enable
-        stats uri /
-
-      # contents of {{ haproxy_config['path'] }}* files
-
-- name: "Create loadbalancer {{ haproxy_config['path'] }} includes"
-  tags: haproxy.config.include
+- name: "Update loadbalancer config in {{ haproxy_config['file'] }}"
   ansible.builtin.template:
-    dest: "{{ haproxy_config['path'] }}{{ item['name'] }}.cfg"
-    src: include.ji2
-  loop: "{{ haproxy_applications }}"
-
-- name: "Assemble config file from {{ haproxy_config['path'] }}*"
-  tags: haproxy.config.assemble
-  ansible.builtin.assemble:
     dest: "{{ haproxy_config['file'] }}"
-    src: "{{ haproxy_config['path'] }}"
-    remote_src: true
-    owner: "{{ haproxy_config['owner'] }}"
-    group: "{{ haproxy_config['group'] }}"
-    setype: "{{ haproxy_config['setype'] }}"
-    validate: haproxy -c -f %s
-  notify: "Restart haproxy service"
+    src: haproxy.ji2
+    backup: true
+  notify: "Restart service"
