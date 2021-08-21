@@ -19,5 +19,6 @@ galaxy_info:
 dependencies:
   - src: https://github.com/mario-slowinski/service
     name: service
+    service_name: "{{ haproxy_service }}"
     service_pkgs: "{{ haproxy_pkgs }}"
     service_firewalld: "{{ haproxy_firewalld }}"
