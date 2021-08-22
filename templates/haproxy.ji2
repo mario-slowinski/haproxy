@@ -1,10 +1,50 @@
-{% include 'global.ji2' %}
+{% macro options(_options,_ns) %}
+{% for key,val in _options.items() %}
+{% if key == 'backends' %}
+{% if _ns.type == 'frontend' %}
 
+backend {{ _options['default_backend'] }}
+{% endif %}
+{% for backend in val %}
+{% if backend['server'] is defined %}
+{% set servers = backend %}
+{{ servers | dict2items }}
+{% elif backend['servers'] is defined %}
+{% set servers = backend['names'] | zip_longest(backend['servers']) %}
+{% endif %}
+{% for server in servers %}
+  server {{ server[0] | default(server[1], True) }} {{ server[1] }}:{{ backend['port'] }} {{ backend['settings'] | default([]) | join(' ') }}
+{% endfor %}
+{% endfor %}
+{% elif val is string %}
+  {{ key }} {{ val }}
+{% elif val is mapping %}
+{{ options(val['server'],_ns) }}
+{% elif val is sequence %}
+{% for item in val %}
+  {{ key }} {{ item }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endmacro %}
+global
+{{ options(haproxy_globals) }}
 
-{% include 'defaults.ji2' %}
+defaults
+{{ options(haproxy_defaults) }}
 
+frontend stats
+{{ options(haproxy_stats) }}
 
-{% include 'stats.ji2' %}
-
-
-{% include 'applications.ji2' %}
+{% for bind in haproxy_binds %}
+{% if bind['listen'] is defined %}
+{% set ns = namespace(type='listen', name=bind.pop('listen')) %}
+{% elif bind['frontend'] is defined %}
+{% set ns = namespace(type='frontend', name=bind.pop('frontend')) %}
+{% endif %}
+#---------------------------------------------------------------------
+# {{ ns.name }}
+#---------------------------------------------------------------------
+{{ ns.type }} {{ ns.name }}
+{{ options(bind,ns) }}
+{% endfor %}
