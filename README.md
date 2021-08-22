@@ -1,9 +1,147 @@
 haproxy
 =======
 
-Ansible role to manage HAproxy.
+Ansible role to manage [HAproxy](http://cbonte.github.io/haproxy-dconv/2.4/configuration.html).
 
-Each load balanced application configuration is stored in separate file in `conf.d` directory and then assembled into single `haproxy.cfg` file which is the only file read by HAproxy.
+HAproxy configuration in `haproxy.cfg` is based on variables related to separated sections:
+
+* *global* in `haproxy_globals`
+* *defaults* in `haproxy_defaults`
+* *stats* in `haproxy_stats`
+* *listens/frontends/backends* in `haproxy_binds`
+
+Each configuration variable entry is transformed to `haproxy.cfg` setting, according to the following rules:
+
+* **string** value to single config space separated entry
+
+  ```yaml
+  bind: "*.443"`
+  ```
+
+  becomes
+
+  ```conf
+  bind *.443
+  ```
+
+* **list** to multiple config entries with the same key
+
+  ```yaml
+  option:
+    - "dontlognull"
+    - "http-server-close"
+    - "redispatch"
+  ```
+
+  becomes
+
+  ```conf
+  option dontlognull
+  option http-server-close
+  option redispatc
+  ```
+
+Special transform is applied to `haproxy_binds`.
+
+* `servers` is list of backend servers (fqdns or ip addresses)
+* `names` is list of backend servers names, replaced by `servers` if not defined</br>
+   for consistency it should have the same number of items as `servers` however it is not mandatory
+* `settings` is list of options appended to each backend server definition
+
+```yaml
+haproxy_binds:
+  - listen: web
+    backends:
+      - servers:
+          - server1.example.com
+          - server2.example.com
+        names:
+          - backend1
+        port: 80
+        settings:
+          - "check"
+          - "inter 2s"
+          - "rise 2"
+          - "fall 3"
+      - servers:
+          - 192.168.0.10
+        names:
+          - backup
+        port: 80
+        settings:
+          - "check"
+          - "inter 2s"
+          - "rise 2"
+          - "fall 3"
+          - "backup"
+```
+
+becomes
+
+```conf
+#---------------------------------------------------------------------
+# web
+#---------------------------------------------------------------------
+listen web
+  server backend1 server1.example.com:80 check inter 2s rise 2 fall 3
+  server server2.example.com server2.example.com:80 check inter 2s rise 2 fall 3
+  server backup 192.168.0.10:80 check inter 2s rise 2 fall 3 backup
+```
+
+Separate **frontends** and **backends** can also be defined.
+
+```yaml
+haproxy_binds:
+  - frontend: "frontend-1"
+    bind: "*:443"
+    mode: "tcp"
+    balance: "roundrobin"
+    default_backend: "backend-0"
+
+  - frontend: "frontend-2"
+    bind: "*:8443"
+    mode: "tcp"
+    balance: "roundrobin"
+    default_backend: "backend-0"
+
+  - backend: "backend-0"
+    backends:
+      - servers:
+          - server1.example.com
+          - server2.example.com
+        port: 443
+        settings:
+          - "check inter 1s"
+```
+
+becomes
+
+```conf
+#---------------------------------------------------------------------
+# frontend-1
+#---------------------------------------------------------------------
+frontend frontend-1
+  bind *:443
+  mode tcp
+  balance roundrobin
+  default_backend backend-0
+
+#---------------------------------------------------------------------
+# frontend-2
+#---------------------------------------------------------------------
+frontend frontend-2
+  bind *:8443
+  mode tcp
+  balance roundrobin
+  default_backend backend-0
+
+#---------------------------------------------------------------------
+# backend-0
+#---------------------------------------------------------------------
+backend backend-0
+  server server1.example.com server1.example.com:443 check inter 1s
+  server server1.example.com server2.example.com:443 check inter 1s
+```
 
 Requirements
 ------------
@@ -17,22 +155,48 @@ Role Variables
 
 * defaults
 
-  ```yaml
-  haproxy_firewalld: []       # firewalld settings
+  * `main.yaml`
 
-  haproxy_applications: []    # list of load balanced applications
-    - name: ""                # name of load balanced application
-      bind: {}                # bind to local interface and frontend port
-      servers: []             # list of backend servers, ansible inventory group
-      port:                   # backend port number
-      settings: []            # list of HAproxy options
-  ```
+    ```yaml
+    haproxy_name: ""        # name presented in HAproxy stats
+    haproxy_firewalld: []   # firewalld settings
+    ```
+
+  * `globals.yaml` - **global** section in `haproxy.cfg`
+  * `defaults.yaml` - **defaults** section in `haproxy.cfg`
+  * `stats.yaml` - **stats** section in `haproxy.cfg`
+  * `binds.yaml` - **listen** and/or **frontend/backend** sections in `haproxy.cfg`
+
+    ```yaml
+    haproxy_binds: []       # list of load balanced binds
+      - listen: ""          # bind name, i.e. http
+        bind: ""            # bind port, i.e. *:80
+        mode: ""            # bind mode, i.e. http
+        balance: ""         # bind balance, i.e. roundrobin, first
+        backends: []        # list of backends definitions
+          - servers: []     # list of backend servers
+            names: []       # list of backend server names (see description)
+            port: ""        # port of backend servers, i.e. 80
+            settings: []    # list of backend servers options, i.e check
+
+      - frontend: ""        # frontend name, i.e. https
+        bind: ""            # bind port, i.e. *:443
+        mode: ""            # bind mode, i.e. http
+        balance: ""         # bind balance, i.e. roundrobin, first
+        default_backend: "" # name of default backend
+        backends: []        # list of backends definitions
+          - servers: []     # list of backend servers
+            names: []       # list of backend server names (see description)
+            port: ""        # port of backend servers, i.e. 443
+            settings: []    # list of backend servers options, i.e check
+    ```
 
 * vars
 
   ```yaml
   haproxy_pkgs: []            # list of HAproxy software packages
   haproxy_config: {}          # HAproxy config files attributes
+  haproxy_service: ""         # systemd (or equivalent) service name
   ```
 
 Dependencies
@@ -45,10 +209,6 @@ Tags
 ----
 
 * haproxy.config
-  * haproxy.config.directory
-  * haproxy.config.base
-  * haproxy.config.include
-  * haproxy.config.assemble
 * haproxy.selinux
   * haproxy.selinux.sebool
   * haproxy.selinux.seport
