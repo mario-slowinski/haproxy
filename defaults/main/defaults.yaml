@@ -1,0 +1,18 @@
+---
+haproxy_defaults:
+  mode: "http"
+  log: "global"
+  option:
+    - "dontlognull"
+    - "http-server-close"
+    - "redispatch"
+  retries: "3"
+  timeout:
+    - "http-request 10s"
+    - "queue 1m"
+    - "connect 10s"
+    - "client 1m"
+    - "server 1m"
+    - "http-keep-alive 10s"
+    - "check 10s"
+  maxconn: "3000"

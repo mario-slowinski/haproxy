@@ -1,0 +1,33 @@
+---
+# http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#5.2
+haproxy_binds:
+  - listen: "http"
+    bind: "*:80"
+    mode: "tcp"
+    balance: "roundrobin" # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#4-balance
+    backends:
+      - servers: "{{ groups[group_names | first] | map('extract', hostvars, 'ansible_host') }}"
+        names: "{{ groups[group_names | first] | map('extract', hostvars, 'inventory_hostname_short') }}"
+        port: 80
+        settings:
+          - "check"
+          - "inter 2s"
+          - "rise 2"
+          - "fall 3"
+
+  - frontend: "https"
+    bind: "*:443"
+    mode: "tcp"
+    default_backend: "https-all"
+    balance: "roundrobin"
+    backends:
+      - servers: "{{ [inventory_hostname] }}"
+        names: "{{ [inventory_hostname_short] }}"
+        port: 443
+        settings:
+          - "check"
+          - "check-ssl"
+          - "verify none"
+          - "inter 2s"
+          - "rise 2"
+          - "fall 3"
