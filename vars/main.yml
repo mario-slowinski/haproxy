@@ -7,7 +7,7 @@ haproxy_pkgs:
 
 
 haproxy_config:
-  file: /etc/haproxy/haproxy.cfg
+  path: /etc/haproxy/haproxy.cfg
   owner: root
   group: root
   mode: 0o644
