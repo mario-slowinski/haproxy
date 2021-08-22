@@ -4,7 +4,7 @@ haproxy_binds:
   - listen: "http"
     bind: "*:80"
     mode: "tcp"
-    balance: "roundrobin" # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#4-balance
+    balance: "roundrobin"  # http://cbonte.github.io/haproxy-dconv/2.3/configuration.html#4-balance
     backends:
       - servers: "{{ groups[group_names | first] | map('extract', hostvars, 'ansible_host') }}"
         names: "{{ groups[group_names | first] | map('extract', hostvars, 'inventory_hostname_short') }}"
