@@ -13,7 +13,7 @@ backend {{ _options['default_backend'] }}
 {% set servers = backend['names'] | zip_longest(backend['servers']) %}
 {% endif %}
 {% for server in servers %}
-  server {{ server[0] | default(server[1], True) }} {{ server[1] }}:{{ backend['port'] }} {{ backend['settings'] | default([]) | join(' ') }}
+  server {{ server[0] | default(server[1], True) }} {{ server[1] | default(server[0], True) }}:{{ backend['port'] }} {{ backend['settings'] | default([]) | join(' ') }}
 {% endfor %}
 {% endfor %}
 {% elif val is string %}
@@ -41,6 +41,8 @@ frontend stats
 {% set ns = namespace(type='listen', name=bind.pop('listen')) %}
 {% elif bind['frontend'] is defined %}
 {% set ns = namespace(type='frontend', name=bind.pop('frontend')) %}
+{% elif bind['backend'] is defined %}
+{% set ns = namespace(type='backend', name=bind.pop('backend')) %}
 {% endif %}
 #---------------------------------------------------------------------
 # {{ ns.name }}
