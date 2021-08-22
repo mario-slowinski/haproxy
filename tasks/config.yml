@@ -1,7 +1,7 @@
 ---
-- name: "Update loadbalancer config in {{ haproxy_config['file'] }}"
+- name: "Update loadbalancer config in {{ haproxy_config['path'] }}"
   ansible.builtin.template:
-    dest: "{{ haproxy_config['file'] }}"
+    dest: "{{ haproxy_config['path'] }}"
     src: haproxy.ji2
     backup: true
   notify: "Restart service"
