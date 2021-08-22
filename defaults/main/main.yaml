@@ -1,0 +1,11 @@
+---
+haproxy_name: "{{ inventory_hostname }}"
+
+haproxy_firewalld:
+  zones:
+    - name: public
+      services:
+        - http
+        - https
+      ports:
+        - 8404

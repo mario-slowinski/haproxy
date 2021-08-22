@@ -1,0 +1,12 @@
+haproxy_stats:
+  frontend: "stats"
+  bind: ":8404"
+  mode: "http"
+  log: "global"
+  option: "httplog"
+  stats:
+    - "enable"
+    - "hide-version"
+    - "refresh 30s"
+    - "uri /stats"
+    - "show-desc {{ haproxy_name }}"
