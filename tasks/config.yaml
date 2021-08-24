@@ -1,7 +1,8 @@
 ---
-- name: "Update loadbalancer config in {{ haproxy_config['path'] }}"
+- name: "Update loadbalancer config in '{{ test_dir | default('') }}{{ haproxy_config['path'] }}'"
   ansible.builtin.template:
-    dest: "{{ haproxy_config['path'] }}"
+    dest: "{{ test_dir | default('') }}{{ haproxy_config['path'] }}"
     src: haproxy.ji2
     backup: true
+    validate: haproxy -c -f %s
   notify: "Restart service"
