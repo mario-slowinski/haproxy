@@ -213,23 +213,29 @@ Tags
   * haproxy.selinux.sebool
   * haproxy.selinux.seport
 
-Example Playbook
-----------------
+Examples
+--------
 
-* `requirements.yml`
+* `requirements.yaml`
 
   ```yaml
   - name: haproxy
     src: https://github.com/mario-slowinski/haproxy
   ```
 
-* playbook usage
+* `playbook.yaml`
 
   ```yaml
   - hosts: servers
-    gather_facts: false
+    gather_facts: true
     roles:
       - role: haproxy
+  ```
+
+* testing, `test_dir` must exist and end with `/`
+
+  ```sh
+  ansible-playbook -e test_dir=/tmp/ playbook.yaml
   ```
 
 License
