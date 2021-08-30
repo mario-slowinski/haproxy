@@ -1,6 +1,5 @@
 ---
 haproxy_stats:
-  frontend: "stats"
   bind: ":8404"
   mode: "http"
   log: "global"
