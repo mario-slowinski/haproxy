@@ -18,8 +18,7 @@ haproxy_binds:
   - frontend: "https"
     bind: "*:443"
     mode: "tcp"
-    default_backend: "https-all"
-    balance: "roundrobin"
+    default_backend: "https"
     backends:
       - servers: "{{ [inventory_hostname] }}"
         names: "{{ [inventory_hostname_short] }}"
