@@ -5,4 +5,4 @@
     src: haproxy.ji2
     backup: true
     validate: haproxy -c -f %s
-  notify: "Restart service"
+  notify: "Restart haproxy service"
